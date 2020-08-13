@@ -24,14 +24,14 @@
 # ARDUINO : AVR = EEPROM HID SPI SoftwareSerial Wire 
 # ARDUINO : SAM = HID SPI Wire 
 #
-APP_LIBS_LIST = SPI Wire
+APP_LIBS_LIST = SPI Wire SD
 
 # List user's libraries here
 # !!! Help: http://bit.ly/2AEscDx
 # default = 0 = none
 #
 #
-USER_LIBS_LIST = AD5293_Arduino
+USER_LIBS_LIST = 0
 
 # List core, application and user's libraries to be excluded
 # !!! Help: http://bit.ly/2AijUOI

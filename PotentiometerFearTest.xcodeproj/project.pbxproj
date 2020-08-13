@@ -8,6 +8,19 @@
 
 /* Begin PBXBuildFile section */
 		5928AC4724BDA23100EC9A8A /* PotentiometerFearTest.ino in Sources */ = {isa = PBXBuildFile; fileRef = 59E8AC4724BDA23100EC9A8A /* PotentiometerFearTest.ino */; };
+		5990420224DDA545008F9F4C /* File.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 599041F124DDA545008F9F4C /* File.cpp */; };
+		5990420324DDA545008F9F4C /* SD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 599041F224DDA545008F9F4C /* SD.cpp */; };
+		5990420424DDA545008F9F4C /* SdVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 599041F724DDA545008F9F4C /* SdVolume.cpp */; };
+		5990420524DDA545008F9F4C /* SdFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 599041F924DDA545008F9F4C /* SdFile.cpp */; };
+		5990420624DDA545008F9F4C /* Sd2Card.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 599041FD24DDA545008F9F4C /* Sd2Card.cpp */; };
+		5990420724DDA550008F9F4C /* SD.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041F324DDA545008F9F4C /* SD.h */; };
+		5990420824DDA558008F9F4C /* Sd2PinMap.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041F624DDA545008F9F4C /* Sd2PinMap.h */; };
+		5990420924DDA55C008F9F4C /* Sd2Card.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041F824DDA545008F9F4C /* Sd2Card.h */; };
+		5990420A24DDA560008F9F4C /* SdFat.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041FA24DDA545008F9F4C /* SdFat.h */; };
+		5990420B24DDA561008F9F4C /* SdInfo.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041FB24DDA545008F9F4C /* SdInfo.h */; };
+		5990420C24DDA563008F9F4C /* SdFatUtil.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041FC24DDA545008F9F4C /* SdFatUtil.h */; };
+		5990420D24DDA567008F9F4C /* SdFatmainpage.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041FE24DDA545008F9F4C /* SdFatmainpage.h */; };
+		5990420E24DDA569008F9F4C /* FatStructs.h in Sources */ = {isa = PBXBuildFile; fileRef = 599041FF24DDA545008F9F4C /* FatStructs.h */; };
 		59E8ABEC24BDA23100EC9A8A /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59E8ABEB24BDA23100EC9A8A /* main.cpp */; };
 		59E8AC6924BDA35B00EC9A8A /* SoftSPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 59E8AC6824BDA35B00EC9A8A /* SoftSPI.cpp */; };
 		59E8AC6A24BDA40F00EC9A8A /* SoftSPI.h in Sources */ = {isa = PBXBuildFile; fileRef = 59E8AC6724BDA35B00EC9A8A /* SoftSPI.h */; };
@@ -91,6 +104,32 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		599041DD24DDA545008F9F4C /* keywords.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = keywords.txt; sourceTree = "<group>"; };
+		599041DE24DDA545008F9F4C /* README.adoc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.adoc; sourceTree = "<group>"; };
+		599041E124DDA545008F9F4C /* ReadWrite.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadWrite.ino; sourceTree = "<group>"; };
+		599041E324DDA545008F9F4C /* DumpFile.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DumpFile.ino; sourceTree = "<group>"; };
+		599041E524DDA545008F9F4C /* Datalogger.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Datalogger.ino; sourceTree = "<group>"; };
+		599041E724DDA545008F9F4C /* Files.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Files.ino; sourceTree = "<group>"; };
+		599041E924DDA545008F9F4C /* CardInfo.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CardInfo.ino; sourceTree = "<group>"; };
+		599041EB24DDA545008F9F4C /* NonBlockingWrite.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NonBlockingWrite.ino; sourceTree = "<group>"; };
+		599041ED24DDA545008F9F4C /* listfiles.ino */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = listfiles.ino; sourceTree = "<group>"; };
+		599041EE24DDA545008F9F4C /* library.properties */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = library.properties; sourceTree = "<group>"; };
+		599041EF24DDA545008F9F4C /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.yaml; path = .travis.yml; sourceTree = "<group>"; };
+		599041F124DDA545008F9F4C /* File.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = File.cpp; sourceTree = "<group>"; };
+		599041F224DDA545008F9F4C /* SD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SD.cpp; sourceTree = "<group>"; };
+		599041F324DDA545008F9F4C /* SD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SD.h; sourceTree = "<group>"; };
+		599041F424DDA545008F9F4C /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		599041F624DDA545008F9F4C /* Sd2PinMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sd2PinMap.h; sourceTree = "<group>"; };
+		599041F724DDA545008F9F4C /* SdVolume.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SdVolume.cpp; sourceTree = "<group>"; };
+		599041F824DDA545008F9F4C /* Sd2Card.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Sd2Card.h; sourceTree = "<group>"; };
+		599041F924DDA545008F9F4C /* SdFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SdFile.cpp; sourceTree = "<group>"; };
+		599041FA24DDA545008F9F4C /* SdFat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SdFat.h; sourceTree = "<group>"; };
+		599041FB24DDA545008F9F4C /* SdInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SdInfo.h; sourceTree = "<group>"; };
+		599041FC24DDA545008F9F4C /* SdFatUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SdFatUtil.h; sourceTree = "<group>"; };
+		599041FD24DDA545008F9F4C /* Sd2Card.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Sd2Card.cpp; sourceTree = "<group>"; };
+		599041FE24DDA545008F9F4C /* SdFatmainpage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SdFatmainpage.h; sourceTree = "<group>"; };
+		599041FF24DDA545008F9F4C /* FatStructs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FatStructs.h; sourceTree = "<group>"; };
+		5990420124DDA545008F9F4C /* codespell-ignore-words-list.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "codespell-ignore-words-list.txt"; sourceTree = "<group>"; };
 		59E8ABE824BDA23100EC9A8A /* Index */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Index; sourceTree = BUILT_PRODUCTS_DIR; };
 		59E8ABEB24BDA23100EC9A8A /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		59E8ABED24BDA23100EC9A8A /* Makefile */ = {isa = PBXFileReference; explicitFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
@@ -267,6 +306,128 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		599041DC24DDA545008F9F4C /* SD */ = {
+			isa = PBXGroup;
+			children = (
+				599041DD24DDA545008F9F4C /* keywords.txt */,
+				599041DE24DDA545008F9F4C /* README.adoc */,
+				599041DF24DDA545008F9F4C /* examples */,
+				599041EE24DDA545008F9F4C /* library.properties */,
+				599041EF24DDA545008F9F4C /* .travis.yml */,
+				599041F024DDA545008F9F4C /* src */,
+				5990420024DDA545008F9F4C /* extras */,
+			);
+			name = SD;
+			path = ../../../../libraries/SD;
+			sourceTree = "<group>";
+		};
+		599041DF24DDA545008F9F4C /* examples */ = {
+			isa = PBXGroup;
+			children = (
+				599041E024DDA545008F9F4C /* ReadWrite */,
+				599041E224DDA545008F9F4C /* DumpFile */,
+				599041E424DDA545008F9F4C /* Datalogger */,
+				599041E624DDA545008F9F4C /* Files */,
+				599041E824DDA545008F9F4C /* CardInfo */,
+				599041EA24DDA545008F9F4C /* NonBlockingWrite */,
+				599041EC24DDA545008F9F4C /* listfiles */,
+			);
+			path = examples;
+			sourceTree = "<group>";
+		};
+		599041E024DDA545008F9F4C /* ReadWrite */ = {
+			isa = PBXGroup;
+			children = (
+				599041E124DDA545008F9F4C /* ReadWrite.ino */,
+			);
+			path = ReadWrite;
+			sourceTree = "<group>";
+		};
+		599041E224DDA545008F9F4C /* DumpFile */ = {
+			isa = PBXGroup;
+			children = (
+				599041E324DDA545008F9F4C /* DumpFile.ino */,
+			);
+			path = DumpFile;
+			sourceTree = "<group>";
+		};
+		599041E424DDA545008F9F4C /* Datalogger */ = {
+			isa = PBXGroup;
+			children = (
+				599041E524DDA545008F9F4C /* Datalogger.ino */,
+			);
+			path = Datalogger;
+			sourceTree = "<group>";
+		};
+		599041E624DDA545008F9F4C /* Files */ = {
+			isa = PBXGroup;
+			children = (
+				599041E724DDA545008F9F4C /* Files.ino */,
+			);
+			path = Files;
+			sourceTree = "<group>";
+		};
+		599041E824DDA545008F9F4C /* CardInfo */ = {
+			isa = PBXGroup;
+			children = (
+				599041E924DDA545008F9F4C /* CardInfo.ino */,
+			);
+			path = CardInfo;
+			sourceTree = "<group>";
+		};
+		599041EA24DDA545008F9F4C /* NonBlockingWrite */ = {
+			isa = PBXGroup;
+			children = (
+				599041EB24DDA545008F9F4C /* NonBlockingWrite.ino */,
+			);
+			path = NonBlockingWrite;
+			sourceTree = "<group>";
+		};
+		599041EC24DDA545008F9F4C /* listfiles */ = {
+			isa = PBXGroup;
+			children = (
+				599041ED24DDA545008F9F4C /* listfiles.ino */,
+			);
+			path = listfiles;
+			sourceTree = "<group>";
+		};
+		599041F024DDA545008F9F4C /* src */ = {
+			isa = PBXGroup;
+			children = (
+				599041F124DDA545008F9F4C /* File.cpp */,
+				599041F224DDA545008F9F4C /* SD.cpp */,
+				599041F324DDA545008F9F4C /* SD.h */,
+				599041F424DDA545008F9F4C /* README.txt */,
+				599041F524DDA545008F9F4C /* utility */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		599041F524DDA545008F9F4C /* utility */ = {
+			isa = PBXGroup;
+			children = (
+				599041F624DDA545008F9F4C /* Sd2PinMap.h */,
+				599041F724DDA545008F9F4C /* SdVolume.cpp */,
+				599041F824DDA545008F9F4C /* Sd2Card.h */,
+				599041F924DDA545008F9F4C /* SdFile.cpp */,
+				599041FA24DDA545008F9F4C /* SdFat.h */,
+				599041FB24DDA545008F9F4C /* SdInfo.h */,
+				599041FC24DDA545008F9F4C /* SdFatUtil.h */,
+				599041FD24DDA545008F9F4C /* Sd2Card.cpp */,
+				599041FE24DDA545008F9F4C /* SdFatmainpage.h */,
+				599041FF24DDA545008F9F4C /* FatStructs.h */,
+			);
+			path = utility;
+			sourceTree = "<group>";
+		};
+		5990420024DDA545008F9F4C /* extras */ = {
+			isa = PBXGroup;
+			children = (
+				5990420124DDA545008F9F4C /* codespell-ignore-words-list.txt */,
+			);
+			path = extras;
+			sourceTree = "<group>";
+		};
 		59E8ABDC24BDA23100EC9A8A = {
 			isa = PBXGroup;
 			children = (
@@ -516,6 +677,7 @@
 		AAAA200714112012AA000018 /* libraries */ = {
 			isa = PBXGroup;
 			children = (
+				599041DC24DDA545008F9F4C /* SD */,
 				AAAA200714112012AA000019 /* EEPROM */,
 				AAAA200714112012AA00001C /* HID */,
 				AAAA200714112012AA00001F /* SPI */,
@@ -1038,12 +1200,25 @@
 				AA2A200714112012AA000012 /* Udp.h in Sources */,
 				AA2A200714112012AA000013 /* WCharacter.h in Sources */,
 				AA2A200714112012AA000014 /* WString.h in Sources */,
+				5990420824DDA558008F9F4C /* Sd2PinMap.h in Sources */,
+				5990420424DDA545008F9F4C /* SdVolume.cpp in Sources */,
 				AA2A200714112012AA000015 /* binary.h in Sources */,
 				AA2A200714112012AA000016 /* new.h in Sources */,
+				5990420924DDA55C008F9F4C /* Sd2Card.h in Sources */,
+				5990420524DDA545008F9F4C /* SdFile.cpp in Sources */,
+				5990420A24DDA560008F9F4C /* SdFat.h in Sources */,
+				5990420C24DDA563008F9F4C /* SdFatUtil.h in Sources */,
+				5990420624DDA545008F9F4C /* Sd2Card.cpp in Sources */,
+				5990420D24DDA567008F9F4C /* SdFatmainpage.h in Sources */,
+				5990420B24DDA561008F9F4C /* SdInfo.h in Sources */,
+				5990420E24DDA569008F9F4C /* FatStructs.h in Sources */,
 				59E8AC6924BDA35B00EC9A8A /* SoftSPI.cpp in Sources */,
 				AA2A200714112012AA000017 /* wiring_private.h in Sources */,
 				AA2A200714112012AA00001B /* EEPROM.h in Sources */,
+				5990420224DDA545008F9F4C /* File.cpp in Sources */,
 				AA2A200714112012AA00001E /* HID.h in Sources */,
+				5990420724DDA550008F9F4C /* SD.h in Sources */,
+				5990420324DDA545008F9F4C /* SD.cpp in Sources */,
 				AA2A200714112012AA000021 /* SPI.h in Sources */,
 				AA2A200714112012AA000024 /* SoftwareSerial.h in Sources */,
 				AA2A200714112012AA000027 /* Wire.h in Sources */,
