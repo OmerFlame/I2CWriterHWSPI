@@ -254,6 +254,8 @@ void load(int selection) {
 
     if (SD.exists(String(selection) + ".txt")) {
         fileToRW = SD.open(String(selection) + ".txt");
+    } else {
+        return;
     }
 
     while (fileToRW.available()) {
@@ -795,52 +797,6 @@ void loop()
         
         // MARK: - Memory DB High
         makeTextDB(String(mapFloat(filters[3].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 40);
-        
-        Serial.print("BUFFER CONTENTS: ");
-        Serial.println(buffer);
-        
-        /*String modifiedReplacementText2 = String(mapFloat(filters[3].memDBReading, 0.0, 1023.0, -10.0, 10.0));
-        
-        Serial.print("MEMORY DB: ");
-        Serial.println(modifiedReplacementText2);
-        //_displayHandler.setPrintPos(dbCursorX, dbCursorY);
-        //_displayHandler.setColor(0, _textColorR, _textColorG, _textColorB);
-        
-        modifiedReplacementText2.remove(modifiedReplacementText2.length() - 1);
-        
-        Serial.print("TRIMMED DB: ");
-        Serial.println(modifiedReplacementText2);
-        
-        if (atof(modifiedReplacementText2.c_str()) > 0) {
-            modifiedReplacementText2 = "+" + modifiedReplacementText2;
-        }
-        
-        Serial.print("DB AFTER +: ");
-        Serial.println(modifiedReplacementText2);
-        
-        if (modifiedReplacementText2 == "+10.0") {
-            modifiedReplacementText2 = "+10";
-        } else if (modifiedReplacementText2 == "-10.0") {
-            modifiedReplacementText2 = "-10";
-        } else if (modifiedReplacementText2 == "+0.0" || modifiedReplacementText2 == "-0.0") {
-            modifiedReplacementText2 = "+0.0";
-        }
-        
-        if (modifiedReplacementText2.length() == 1) {
-            //_displayHandler.print("   ");
-            modifiedReplacementText2 += "   ";
-        } else if (modifiedReplacementText2.length() == 2) {
-            //_displayHandler.print("  ");
-            modifiedReplacementText2 += "  ";
-        } else if (modifiedReplacementText2.length() == 3) {
-            //_displayHandler.print(" ");
-            modifiedReplacementText2 += " ";
-        }
-        
-        Serial.print("FINAL DB: ");
-        Serial.println(modifiedReplacementText2);
-        
-        modifiedReplacementText2.toCharArray(buffer, 40);*/
         Wire.beginTransmission(4);
         Wire.write(0x31);
         Wire.write(buffer);
@@ -848,9 +804,8 @@ void loop()
         
         // MARK: - Memory Q High
         makeTextQ(String(map(filters[3].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 40);
-        
         Wire.beginTransmission(4);
-        Wire.write(0x31);
+        Wire.write(0x32);
         Wire.write(buffer);
         Wire.endTransmission();
         
@@ -885,7 +840,8 @@ void loop()
         
         // MARK: - Memory Q Mid-2
         makeTextQ(String(map(filters[2].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 40);
-        Wire.beginTransmission(0x22);
+        Wire.beginTransmission(4);
+        Wire.write(0x22);
         Wire.write(buffer);
         Wire.endTransmission();
         
