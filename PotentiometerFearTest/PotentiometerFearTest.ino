@@ -55,6 +55,7 @@
 #define LED_MID2_PK                     6
 #define LED_BYPASS                     47
 #define LED_LO_PK                      44
+#define MEM_INDICATOR                  40
 
 #define MENU_BTN  9
 #define SET_BTN   8
@@ -175,72 +176,6 @@ void receiveEvent(int howMany) {
     }
 }
 
-void save(int selection) {
-    Serial.println(String(selection) + ".txt");
-    if (SD.exists(String(selection) + ".txt")) {
-        SD.remove(String(selection) + ".txt");
-
-        fileToRW = SD.open(String(selection) + ".txt", FILE_WRITE);
-    } else {
-        fileToRW = SD.open(String(selection) + ".txt", FILE_WRITE);
-        fileToRW.close();
-
-        if(SD.exists(String(selection) + ".txt")) {
-            Serial.println("New file created");
-            fileToRW = SD.open(String(selection) + ".txt", FILE_WRITE);
-        }
-    }
-
-    if (fileToRW) {
-        //fileToRW.seek(0);
-
-        //fileToRW.println("This is a test");
-        //fileToRW.close();
-        for (int i = 0; i < 4; i++) {
-            long freqToSave = filters[i].lastFreqReading;
-            int dbToSave = filters[i].lastDBReading;
-            int qToSave = filters[i].lastQReading;
-
-            Serial.println(freqToSave);
-            Serial.println(String(dbToSave));
-            Serial.println(String(qToSave));
-
-            fileToRW.print("FILTER ");
-            fileToRW.print(String(i));
-            fileToRW.print(" ");
-            
-            fileToRW.print(String(freqToSave) + " ");
-            fileToRW.print(String(dbToSave) + " ");
-            fileToRW.print(String(qToSave) + " ");
-            
-            fileToRW.print("END ");
-        }
-        
-        long lpfFrequencyToSave = lastLowPassReading;
-        Serial.print("LPF: ");
-        Serial.println(lpfFrequencyToSave);
-        
-        fileToRW.print("LPF ");
-        fileToRW.print(String(lpfFrequencyToSave) + " ");
-        fileToRW.print("END ");
-        
-        long hpfFrequencyToSave = lastHighPassReading;
-        Serial.print("HPF: ");
-        Serial.println(String(hpfFrequencyToSave));
-        
-        fileToRW.print("HPF ");
-        fileToRW.print(String(hpfFrequencyToSave) + " ");
-        fileToRW.print("END ");
-        
-        fileToRW.print("ENDFIN ");
-        fileToRW.close();
-
-        Serial.println("SUCCESS WRITING TO FILE!");
-    } else {
-        Serial.println("Unable to open the file");
-    }
-}
-
 void load(int selection) {
     int keywordCount = 0;
     int currentCell = 0;
@@ -305,29 +240,36 @@ void load(int selection) {
 
         if ((extractedKeywords[i] == "0" || "1" || "2" || "3") && (lastKeywordDescription == FilterDeclaration) && lastKeyword == "FILTER") {
             currentFilter = extractedKeywords[i].toInt();
+            Serial.print("CURRENT FILTER: ");
+            Serial.println(currentFilter);
             lastKeyword = extractedKeywords[i];
             lastKeywordDescription = FilterIndex;
             continue;
         }
 
         if (lastKeywordDescription == FilterIndex) {
-            frequencyData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            //frequencyData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            frequencyData = extractedKeywords[i].toInt();
+            filters[currentFilter].memFreqReading = frequencyData;
             Serial.println(frequencyData);
             lastKeyword = extractedKeywords[i];
             lastKeywordDescription = FrequencyValue;
             continue;
         }
 
-        if ((extractedKeywords[i].indexOf(".") > 0) && (lastKeywordDescription == FrequencyValue)) {
+        if (lastKeywordDescription == FrequencyValue) {
             dbData = extractedKeywords[i].toInt();
+            filters[currentFilter].memDBReading = dbData;
             Serial.println(dbData);
             lastKeyword = extractedKeywords[i];
             lastKeywordDescription = DBValue;
             continue;
         }
 
-        if ((lastKeyword.indexOf(".") > 0) && (lastKeywordDescription == DBValue)) {
+        if (lastKeywordDescription == DBValue) {
             qData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            //qData = extractedKeywords[currentFilter].toInt();
+            filters[currentFilter].memQReading = qData;
             Serial.println(extractedKeywords[i].c_str());
             //Serial.println(int(test));
             lastKeyword = extractedKeywords[i];
@@ -339,9 +281,9 @@ void load(int selection) {
             lastKeyword = extractedKeywords[i];
             lastKeywordDescription = EndFilterDeclaration;
 
-            filters[currentFilter].memFreqReading = frequencyData;
-            filters[currentFilter].memDBReading = dbData;
-            filters[currentFilter].memQReading = qData;
+            //filters[currentFilter].memFreqReading = frequencyData;
+            //filters[currentFilter].memDBReading = dbData;
+            //filters[currentFilter].memQReading = qData;
             continue;
         }
         
@@ -389,9 +331,278 @@ void load(int selection) {
             break;
         }
     }
-
+    
+    Serial.println("VALUES:");
+    
+    for (int i = 0; i < 4; i++) {
+        Serial.print("filters[" + String(i) + "].memFreqReading: ");
+        Serial.println(filters[i].memFreqReading);
+        
+        Serial.print("filters[" + String(i) + "].memDBReading: ");
+        Serial.println(filters[i].memDBReading);
+        
+        Serial.print("filters[" + String(i) + "].memQReading: ");
+        Serial.println(filters[i].memQReading);
+    }
+    
+    Serial.print("memLowPassReading: ");
+    Serial.println(memLowPassReading);
+    
+    Serial.print("memHighPassReading: ");
+    Serial.println(memHighPassReading);
     //*_parentMemoryBool = true;
+    
+    delay(1000);
 }
+
+void save(int selection) {
+    Serial.println(String(selection) + ".txt");
+    if (SD.exists(String(selection) + ".txt")) {
+        SD.remove(String(selection) + ".txt");
+
+        fileToRW = SD.open(String(selection) + ".txt", FILE_WRITE);
+    } else {
+        fileToRW = SD.open(String(selection) + ".txt", FILE_WRITE);
+        fileToRW.close();
+
+        if(SD.exists(String(selection) + ".txt")) {
+            Serial.println("New file created");
+            fileToRW = SD.open(String(selection) + ".txt", FILE_WRITE);
+        }
+    }
+
+    if (fileToRW) {
+        //fileToRW.seek(0);
+
+        //fileToRW.println("This is a test");
+        //fileToRW.close();
+        for (int i = 0; i < 4; i++) {
+            long freqToSave = filters[i].lastFreqReading;
+            int dbToSave = filters[i].lastDBReading;
+            int qToSave = filters[i].lastQReading;
+
+            Serial.println(freqToSave);
+            Serial.println(String(dbToSave));
+            Serial.println(String(qToSave));
+
+            fileToRW.print("FILTER ");
+            fileToRW.print(String(i));
+            fileToRW.print(" ");
+            
+            fileToRW.print(String(freqToSave) + " ");
+            fileToRW.print(String(dbToSave) + " ");
+            fileToRW.print(String(qToSave) + " ");
+            
+            fileToRW.print("END ");
+        }
+        
+        long lpfFrequencyToSave = lastLowPassReading;
+        Serial.print("LPF: ");
+        Serial.println(lpfFrequencyToSave);
+        
+        fileToRW.print("LPF ");
+        fileToRW.print(String(lpfFrequencyToSave) + " ");
+        fileToRW.print("END ");
+        
+        long hpfFrequencyToSave = lastHighPassReading;
+        Serial.print("HPF: ");
+        Serial.println(String(hpfFrequencyToSave));
+        
+        fileToRW.print("HPF ");
+        fileToRW.print(String(hpfFrequencyToSave) + " ");
+        fileToRW.print("END ");
+        
+        fileToRW.print("ENDFIN ");
+        fileToRW.close();
+
+        Serial.println("SUCCESS WRITING TO FILE!");
+    } else {
+        Serial.println("Unable to open the file");
+    }
+    
+    //delay(1000);
+    
+    load(selection);
+}
+
+/*void load(int selection) {
+    int keywordCount = 0;
+    int currentCell = 0;
+    String fileContents = "";
+    String extractedKeyword = "";
+    long frequencyData;
+    int dbData;
+    int qData;
+    long lpfData;
+    long hpfData;
+
+    if (SD.exists(String(selection) + ".txt")) {
+        fileToRW = SD.open(String(selection) + ".txt");
+    } else {
+        return;
+    }
+
+    while (fileToRW.available()) {
+        char currentCharacter = fileToRW.read();
+        fileContents += currentCharacter;
+
+        if (currentCharacter == ' ') {
+            keywordCount++;
+        }
+    }
+
+    keywordCount++;
+
+    Serial.print("Keyword count: ");
+    Serial.println(String(keywordCount));
+
+    String extractedKeywords[keywordCount];
+
+    Serial.println(fileContents);
+
+    for (int i = 0; i <= fileContents.length() + 7; i++) {
+        if (fileContents[i] != ' ') {
+            extractedKeyword += fileContents[i];
+        }
+
+        if (fileContents[i] == ' ') {
+            extractedKeywords[currentCell] = extractedKeyword;
+            currentCell++;
+
+            Serial.print("The extracted keyword is: ");
+            Serial.println(extractedKeyword);
+            extractedKeyword = "";
+        }
+    }
+
+    fileToRW.close();
+
+    int currentFilter;
+    String lastKeyword;
+    parserSituations lastKeywordDescription;
+    for (int i = 0; i < keywordCount; i++) {
+        if (extractedKeywords[i] == "FILTER") {
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = FilterDeclaration;
+            continue;
+        }
+
+        if ((extractedKeywords[i] == "0" || "1" || "2" || "3") && (lastKeywordDescription == FilterDeclaration) && lastKeyword == "FILTER") {
+            currentFilter = extractedKeywords[i].toInt();
+            Serial.print("CURRENT FILTER: ");
+            Serial.println(currentFilter);
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = FilterIndex;
+            continue;
+        }
+
+        if (lastKeywordDescription == FilterIndex) {
+            //frequencyData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            frequencyData = extractedKeywords[i].toInt();
+            filters[currentFilter].memFreqReading = frequencyData;
+            Serial.println(frequencyData);
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = FrequencyValue;
+            continue;
+        }
+
+        if (lastKeywordDescription == FrequencyValue) {
+            dbData = extractedKeywords[i].toInt();
+            filters[currentFilter].memDBReading = dbData;
+            Serial.println(dbData);
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = DBValue;
+            continue;
+        }
+
+        if (lastKeywordDescription == DBValue) {
+            qData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            //qData = extractedKeywords[currentFilter].toInt();
+            filters[currentFilter].memQReading = qData;
+            Serial.println(extractedKeywords[i].c_str());
+            //Serial.println(int(test));
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = QValue;
+            continue;
+        }
+
+        if ((lastKeywordDescription == QValue) && (extractedKeywords[i] == "END")) {
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = EndFilterDeclaration;
+
+            //filters[currentFilter].memFreqReading = frequencyData;
+            //filters[currentFilter].memDBReading = dbData;
+            //filters[currentFilter].memQReading = qData;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == EndFilterDeclaration) && (extractedKeywords[i] == "LPF")) {
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = LowPassFilterDeclaration;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == LowPassFilterDeclaration)) {
+            lpfData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = LowPassFilterData;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == LowPassFilterData) && (extractedKeywords[i] == "END")) {
+            memLowPassReading = lpfData;
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = EndLowPassFilterDeclaration;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == EndLowPassFilterDeclaration) && (extractedKeywords[i] == "HPF")) {
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = HighPassFilterDeclaration;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == HighPassFilterDeclaration)) {
+            hpfData = strtol(extractedKeywords[i].c_str(), NULL, 10);
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = HighPassFilterData;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == HighPassFilterData) && (extractedKeywords[i] == "END")) {
+            memHighPassReading = hpfData;
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = EndHighPassFilterDeclaration;
+            continue;
+        }
+
+        if (extractedKeywords[i] == "ENDFIN") {
+            break;
+        }
+    }
+    
+    Serial.println("VALUES:");
+    
+    for (int i = 0; i < 4; i++) {
+        Serial.print("filters[" + String(i) + "].memFreqReading: ");
+        Serial.println(filters[i].memFreqReading);
+        
+        Serial.print("filters[" + String(i) + "].memDBReading: ");
+        Serial.println(filters[i].memDBReading);
+        
+        Serial.print("filters[" + String(i) + "].memQReading: ");
+        Serial.println(filters[i].memQReading);
+    }
+    
+    Serial.print("memLowPassReading: ");
+    Serial.println(memLowPassReading);
+    
+    Serial.print("memHighPassReading: ");
+    Serial.println(memHighPassReading);
+    //*_parentMemoryBool = true;
+    
+    delay(1000);
+}*/
 
 String makeTextFrequency(String replacementText) {
     String modifiedReplacementText = replacementText;
@@ -593,6 +804,7 @@ void setup()
     pinMode(SW_BYPASS, INPUT);
     pinMode(MENU_OUT, OUTPUT);
     pinMode(SET_OUT, OUTPUT);
+    pinMode(MEM_INDICATOR, OUTPUT);
     pinMode(4, OUTPUT);
     pinMode(23, OUTPUT);
     SPI.begin();
@@ -603,6 +815,7 @@ void setup()
     digitalWrite(SET_OUT, HIGH);
     digitalWrite(UP_OUT, HIGH);
     digitalWrite(DOWN_OUT, HIGH);
+    digitalWrite(MEM_INDICATOR, LOW);
     
     Serial.begin(9600);
     
@@ -782,32 +995,38 @@ void loop()
     }
     
     if (shouldUseMemory) {
-        char buffer[40];
+        char buffer[20];
         
         for (int i = 0; i < sizeof(buffer); i++) {
             buffer[i] == 0x00;
         }
         
         // MARK: - Memory Frequency High
-        makeTextFrequency(String(map(filters[3].memFreqReading, 0, 1023, 800, 17000))).toCharArray(buffer, 40);
+        makeTextFrequency(String(map(filters[3].memFreqReading, 0, 1023, 800, 17000))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x30);
         Wire.write(buffer);
-        Wire.endTransmission();
+        //Wire.write("040");
+        Wire.endTransmission(true);
         
         // MARK: - Memory DB High
-        makeTextDB(String(mapFloat(filters[3].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 40);
+        makeTextDB(String(mapFloat(filters[3].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x31);
         Wire.write(buffer);
-        Wire.endTransmission();
+        //Wire.write("-10");
+        Wire.endTransmission(true);
         
         // MARK: - Memory Q High
-        makeTextQ(String(map(filters[3].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 40);
+        makeTextQ(String(map(filters[3].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x32);
         Wire.write(buffer);
-        Wire.endTransmission();
+        //Wire.write("000");
+        Wire.endTransmission(true);
         
         // MARK: - Math Memory High
         long frequency = map(filters[3].memFreqReading, 0, 1023, 800, 17000);
@@ -825,25 +1044,28 @@ void loop()
         word qInstruction = wiperToInstruction(wiperFromTravel);
         
         // MARK: - Memory Frequency Mid-2
-        makeTextFrequency(String(map(filters[2].memFreqReading, 0, 1023, 400, 8000))).toCharArray(buffer, 40);
+        makeTextFrequency(String(map(filters[2].memFreqReading, 0, 1023, 400, 8000))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x20);
         Wire.write(buffer);
         Wire.endTransmission();
         
         // MARK: - Memory DB Mid-2
-        makeTextDB(String(mapFloat(filters[2].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 40);
+        makeTextDB(String(mapFloat(filters[2].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x21);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Memory Q Mid-2
-        makeTextQ(String(map(filters[2].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 40);
+        makeTextQ(String(map(filters[2].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x22);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Math Memory Mid-2
         long frequency2 = map(filters[2].memFreqReading, 0, 1023, 400, 8000);
@@ -860,11 +1082,12 @@ void loop()
         word qInstruction2 = wiperToInstruction(wiperFromTravel2);
         
         // MARK: - Memory Low-Pass
-        makeTextLowPass(String(map(memLowPassReading, 0, 1023, long(96.46), 14615))).toCharArray(buffer, 40);
+        makeTextLowPass(String(map(memLowPassReading, 0, 1023, long(96.46), 14615))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x40);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Math Memory Low-Pass
         long lowPassFreq = map(memLowPassReading, 0, 1023, long(96.46), long(14615));
@@ -872,27 +1095,30 @@ void loop()
         lowPassResistance = mapFloat(lowPassResistance, 330.0, 50238.30, 330.0, 50000.0);
         int lowPassWiper = 1023 - resistanceToWiper(50000, lowPassResistance);
         word lowPassInstruction = wiperToInstruction(lowPassWiper);
-        
+         
         // MARK: - Memory Frequency Mid-1
-        makeTextFrequency(String(map(filters[1].memFreqReading, 0, 1023, 400, 8000))).toCharArray(buffer, 40);
+        makeTextFrequency(String(map(filters[1].memFreqReading, 0, 1023, 400, 8000))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x10);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Memory DB Mid-1
-        makeTextDB(String(mapFloat(filters[1].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 40);
+        makeTextDB(String(mapFloat(filters[1].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x11);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Memory Q Mid-1
-        makeTextQ(String(map(filters[1].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 40);
+        makeTextQ(String(map(filters[1].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x12);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Math Memory Mid-1
         long frequencyMid1 = map(filters[1].memFreqReading, 0, 1023, 400, 8000);
@@ -911,11 +1137,12 @@ void loop()
         word qInstructionMid1 = wiperToInstruction(wiperFromTravelMid1);
         
         // MARK: - Memory High-Pass
-        makeTextHighPass(String(map(memHighPassReading, 0, 1023, long(26.526), long(2368.4)))).toCharArray(buffer, 40);
+        makeTextHighPass(String(map(memHighPassReading, 0, 1023, long(26.526), long(2368.4)))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x50);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Math Memory High-Pass
         long highPassFreq = map(memHighPassReading, 0, 1023, long(26.526), long(2368.4));
@@ -935,28 +1162,28 @@ void loop()
                 break;
         }
         
-        modifiedReplacementText.toCharArray(buffer, 40);
-        
+        modifiedReplacementText.toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x00);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Memory DB Low
-        makeTextDB(String(mapFloat(filters[0].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 40);
-        
+        makeTextDB(String(mapFloat(filters[0].memDBReading, 0.0, 1023.0, -10.0, 10.0))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x01);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Memory Q Low
-        makeTextQ(String(map(filters[0].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 40);
-        
+        makeTextQ(String(map(filters[0].memQReading, 0, 1023, 0, 100))).toCharArray(buffer, 20);
+        //delay(100);
         Wire.beginTransmission(4);
         Wire.write(0x02);
         Wire.write(buffer);
-        Wire.endTransmission();
+        Wire.endTransmission(true);
         
         // MARK: - Math Memory Low
         long frequencyLow = map(filters[0].memFreqReading, 0, 1023, 40, 800);
@@ -971,6 +1198,12 @@ void loop()
         float resistanceFromTravelLow = 5000 * travelToResistanceLog(travelLow);
         int wiperFromTravelLow = resistanceToWiper(20000, resistanceFromTravelLow);
         word qInstructionLow = wiperToInstruction(wiperFromTravelLow);
+        
+        /*Wire.beginTransmission(4);
+        Wire.write(0x90);
+        Wire.endTransmission(true);*/
+        
+        digitalWrite(MEM_INDICATOR, HIGH);
         
         // MARK: - Memory SPI
         digitalWrite(53, LOW);
@@ -996,8 +1229,10 @@ void loop()
         SPI.transfer16(dbInstructionMid1);
         delay(1);
         SPI.transfer16(lowPassInstruction);
+        //SPI.transfer16(0x0000);
         delay(1);
         SPI.transfer16(lowPassInstruction);
+        //SPI.transfer16(0x0000);
         delay(1);
         SPI.transfer16(qInstruction2);
         delay(1);
@@ -1019,6 +1254,101 @@ void loop()
         digitalWrite(53, HIGH);
         
         while (shouldUseMemory == true) {
+            // MARK: - LOW LATCH
+            lowPickState = digitalRead(SW_LO_PK);
+            
+            if (lowPickState != lastLowPickState) {
+                if (lowPickState == HIGH) {
+                    lowPickCounter++;
+                }
+                
+                delay(50);
+            }
+            
+            lastLowPickState = lowPickState;
+            
+            if (lowPickCounter % 2 == 0) {
+                digitalWrite(LED_LO_PK, HIGH);
+            } else {
+                digitalWrite(LED_LO_PK, LOW);
+            }
+            
+            // MARK: - MID2 LATCH
+            mid2State = digitalRead(SW_MID2_PK);
+            
+            if (mid2State != lastMid2PickState) {
+                if (mid2State == HIGH) {
+                    mid2Counter++;
+                }
+                
+                delay(50);
+            }
+            
+            lastMid2PickState = mid2State;
+            
+            if (mid2Counter % 2 == 0) {
+                digitalWrite(LED_MID2_PK, HIGH);
+            } else {
+                digitalWrite(LED_MID2_PK, LOW);
+            }
+            
+            // MARK: - HIGH LATCH
+            highPickState = digitalRead(SW_HI_PK);
+            
+            if (highPickState != lastHighPickState) {
+                if (highPickState == HIGH) {
+                    highPickCounter++;
+                }
+                
+                delay(50);
+            }
+            
+            lastHighPickState = highPickState;
+            
+            if (highPickCounter % 2 == 0) {
+                digitalWrite(LED_HI_PK, HIGH);
+            } else {
+                digitalWrite(LED_HI_PK, LOW);
+            }
+            
+            // MARK: - FILTER ON LATCH
+            filterOnState = digitalRead(SW_FILTER_ON);
+            
+            if (filterOnState != lastFilterOnState) {
+                if (filterOnState == HIGH) {
+                    filterOnCounter++;
+                }
+                
+                delay(50);
+            }
+            
+            lastFilterOnState = filterOnState;
+            
+            if (filterOnCounter % 2 == 0) {
+                digitalWrite(LED_FILTER_ON, LOW);
+            } else {
+                digitalWrite(LED_FILTER_ON, HIGH);
+            }
+            
+            // MARK: - BYPASS LATCH
+            bypassState = digitalRead(SW_BYPASS);
+            
+            if (bypassState != lastBypassState) {
+                if (bypassState == HIGH) {
+                    bypassCounter++;
+                }
+                
+                delay(50);
+            }
+            
+            lastBypassState = bypassState;
+            
+            if (bypassCounter % 2 == 0) {
+                digitalWrite(LED_BYPASS, LOW);
+            } else {
+                digitalWrite(LED_BYPASS, HIGH);
+            }
+            
             Wire.requestFrom(4, 2);
             
             commandByte = Wire.read();
@@ -1031,18 +1361,10 @@ void loop()
             }
             
             if (commandByte == 0x02) {
-                if (dataByte == 0x01) {
-                    shouldUseMemory = true;
-                    
-                    Wire.beginTransmission(4);
-                    Wire.write(0x90);
-                    Wire.endTransmission(true);
-                } else {
+                if (dataByte == 0x00) {
                     shouldUseMemory = false;
                     
-                    Wire.beginTransmission(4);
-                    Wire.write(0x80);
-                    Wire.endTransmission(true);
+                    digitalWrite(MEM_INDICATOR, LOW);
                     
                     for (int i = 0; i < 4; i++) {
                         filters[i].lastFreqReading = -1;
@@ -1052,6 +1374,25 @@ void loop()
                     
                     lastHighPassReading = -1;
                     lastLowPassReading = -1;
+                    return;
+                }
+            }
+            
+            if (commandByte == 0x95) {
+                if (dataByte == 0x00) {
+                    //shouldUseMemory = true;
+                    return;
+                } else {
+                    shouldUseMemory = false;
+                    for (int i = 0; i < 4; i++) {
+                        filters[i].lastFreqReading = -1;
+                        filters[i].lastDBReading = -1;
+                        filters[i].lastQReading = -1;
+                    }
+                    
+                    lastHighPassReading = -1;
+                    lastLowPassReading = -1;
+                    
                     return;
                 }
             }
@@ -1076,10 +1417,26 @@ void loop()
             if (dataByte == 0x01) {
                 shouldUseMemory = true;
                 
-                Wire.beginTransmission(4);
+                /*Wire.beginTransmission(4);
                 Wire.write(0x90);
-                Wire.endTransmission(true);
+                Wire.endTransmission();*/
+                delay(1000);
+                return;
+            }
+        }
+        
+        if (commandByte == 0x95) {
+            if (dataByte == 0x01) {
+                for (int i = 0; i < 4; i++) {
+                    filters[i].lastFreqReading = -1;
+                    filters[i].lastDBReading = -1;
+                    filters[i].lastQReading = -1;
+                }
                 
+                lastHighPassReading = -1;
+                lastLowPassReading = -1;
+            } else {
+                shouldUseMemory = true;
                 return;
             }
         }
@@ -1318,7 +1675,8 @@ void loop()
         float resistanceFromTravel2 = 5000 * travelToResistanceLog(travel2);
         int wiperFromTravel2 = resistanceToWiper(20000, resistanceFromTravel2);
         word qInstruction2 = wiperToInstruction(wiperFromTravel2);
-    
+        
+        
         // MARK: - Transition to Low-Pass Vals
         freqReading = analogRead(A10);
         
@@ -1335,7 +1693,7 @@ void loop()
             Wire.write(buffer);
             Wire.endTransmission(true);
         }
-    
+        
         // MARK: - Math Low-Pass
         //float lowPassResistance = freqToResistanceAntiLog(freqReading, 0.00000000033);
         long lowPassFreq = map(freqReading, 0, 1023, long(96.46), long(14615));
@@ -1345,7 +1703,7 @@ void loop()
         word lowPassInstruction = wiperToInstruction(lowPassWiper);
         //Serial.print("LOW PASS WIPER: ");
         //Serial.println(lowPassWiper);
-    
+        
         // MARK: - Transition to Mid-1 Values
         freqReading = analogRead(A14);
         dbReading = analogRead(A8);
@@ -1534,8 +1892,10 @@ void loop()
         SPI.transfer16(dbInstructionMid1);
         delay(1);
         SPI.transfer16(lowPassInstruction);
+        //SPI.transfer16(0x0000);
         delay(1);
         SPI.transfer16(lowPassInstruction);
+        //SPI.transfer16(0x0000);
         delay(1);
         SPI.transfer16(qInstruction2);
         delay(1);

@@ -55,7 +55,7 @@ USER_LIBS_LIST = 0
 # !!! Help: http://bit.ly/2yUvq0h
 # If not defined, BOARD_PORT = /dev/tty.usb* (default)
 #
-#BOARD_PORT = /dev/tty.usbmodem*
+BOARD_PORT = /dev/cu.usbmodem14101
 
 # Xcode takes SKETCHBOOK_DIR from preferences.txt
 # If not defined, each IDE has its own SKETCHBOOK_DIR (default)
