@@ -77,7 +77,13 @@ enum parserSituations {
     EndLowPassFilterDeclaration,
     HighPassFilterDeclaration,
     HighPassFilterData,
-    EndHighPassFilterDeclaration
+    EndHighPassFilterDeclaration,
+    LatchDeclaration,
+    LatchIndex,
+    LatchCounterValue,
+    LatchStateValue,
+    LatchLastStateValue,
+    EndLatchDeclaration
 };
 
 class Filter {
@@ -91,66 +97,89 @@ public:
     int memQReading;
 };
 
+class Latch {
+public:
+    int counter = 0;
+    int state = 0;
+    int lastState = 0;
+    
+    int memCounter;
+    int memState;
+    int memLastState;
+    
+    int tempCounter;
+    int tempState;
+    int tempLastState;
+};
+
 byte commandByte = 0x00;
 byte dataByte = 0x00;
 
-int setCounter = 0;
-int setState = 0;
-int lastSetState = 0;
+//int setCounter = 0;
+//int setState = 0;
+//int lastSetState = 0;
 
 bool shouldUseMemory = false;
 bool shouldShowMenu = false;
 
-int lowPickCounter = 0;
-int lowPickState = 0;
-int lastLowPickState = 0;
+//int latches[0].counter = 0;
+//int latches[0].state = 0;
+//int latches[0].lastState = 0;
 
-int mid2Counter = 0;
-int mid2State = 0;
-int lastMid2PickState = 0;
+//int mid2Counter = 0;
+//int mid2State = 0;
+//int lastMid2PickState = 0;
 
 //2068
 
-int highPickCounter = 0;
-int highPickState = 0;
-int lastHighPickState = 0;
+//int latches[2].counter = 0;
+//int latches[2].state = 0;
+//int latches[2].lastState = 0;
 
-int filterOnCounter = 0;
-int filterOnState = 0;
-int lastFilterOnState = 0;
+//int latches[3].counter = 0;
+//int latches[3].state = 0;
+//int latches[3].lastState = 0;
 
-int bypassCounter = 0;
-int bypassState = 0;
-int lastBypassState = 0;
+//int latches[4].counter = 0;
+//int latches[4].state = 0;
+//int latches[4].lastState = 0;
 
 Filter lowBand;
 Filter mid1Band;
 Filter mid2Band;
 Filter highBand;
 
-Filter filters[] = { lowBand, mid1Band, mid2Band, highBand };
+Latch lowPick;
+Latch mid2;
+Latch highPick;
+Latch filterOn;
+Latch bypass;
 
-int lastFreqReadingHigh;
+Filter filters[] = { lowBand, mid1Band, mid2Band, highBand };
+Latch latches[] = { lowPick, mid2, highPick, filterOn, bypass };
+
+/*int lastFreqReadingHigh;
 int lastDBReadingHigh;
 int lastQReadingHigh;
 
 int lastFreqReadingMid2;
 int lastDBReadingMid2;
-int lastQReadingMid2;
+int lastQReadingMid2;*/
 
 int lastLowPassReading;
 int memLowPassReading;
 
-int lastFreqReadingMid1;
+/*int lastFreqReadingMid1;
 int lastDBReadingMid1;
-int lastQReadingMid1;
+int lastQReadingMid1;*/
 
 int lastHighPassReading;
 int memHighPassReading;
 
+/*
 int lastFreqReadingLow;
 int lastDBReadingLow;
-int lastQReadingLow;
+int lastQReadingLow;*/
 
 File fileToRW;
 
@@ -229,6 +258,7 @@ void load(int selection) {
     fileToRW.close();
 
     int currentFilter;
+    int currentLatch;
     String lastKeyword;
     parserSituations lastKeywordDescription;
     for (int i = 0; i < keywordCount; i++) {
@@ -326,10 +356,60 @@ void load(int selection) {
             lastKeywordDescription = EndHighPassFilterDeclaration;
             continue;
         }
+        
+        if (extractedKeywords[i] == "LATCH") {
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = LatchDeclaration;
+            continue;
+        }
+        
+        if ((lastKeywordDescription == LatchDeclaration) && (extractedKeywords[i] == "0" || "1" || "2" || "3" || "4")) {
+            currentLatch = extractedKeywords[i].toInt();
+            Serial.println("CURRENTLY IN LATCH " + String(currentLatch));
+            lastKeywordDescription = LatchIndex;
+            lastKeyword = extractedKeywords[i];
+            continue;
+        }
+        
+        if (lastKeywordDescription == LatchIndex) {
+            Serial.println("EXTRACTED LATCH COUNTER: " + String(extractedKeywords[i].toInt()));
+            latches[currentLatch].memCounter = extractedKeywords[i].toInt();
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = LatchCounterValue;
+            continue;
+        }
+        
+        if (lastKeywordDescription == LatchCounterValue) {
+            latches[currentLatch].memState = extractedKeywords[i].toInt();
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = LatchStateValue;
+            continue;
+        }
+        
+        if (lastKeywordDescription == LatchStateValue) {
+            latches[currentLatch].memLastState = extractedKeywords[i].toInt();
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = LatchLastStateValue;
+            continue;
+        }
+        
+        if (lastKeywordDescription == LatchLastStateValue && extractedKeywords[i] == "END") {
+            lastKeyword = extractedKeywords[i];
+            lastKeywordDescription = EndLatchDeclaration;
+            continue;
+        }
+        
+        // COUNTER, STATE AND THEN LASTSTATE
 
         if (extractedKeywords[i] == "ENDFIN") {
             break;
         }
+    }
+    
+    for (int i = 0; i < 5; i++) {
+        Serial.println("latches[" + String(i) + "].memCounter = " + String(latches[i].memCounter));
+        Serial.println("latches[" + String(i) + "].memState = " + String(latches[i].memState));
+        Serial.println("latches[" + String(i) + "].memLastState = " + String(latches[i].memLastState));
     }
     
     Serial.println("VALUES:");
@@ -411,6 +491,24 @@ void save(int selection) {
         fileToRW.print("HPF ");
         fileToRW.print(String(hpfFrequencyToSave) + " ");
         fileToRW.print("END ");
+        
+        //int setCounterToSave = setCounter;
+        //int setStateToSave = setState;
+        
+        for (int i = 0; i < 5; i++) {
+            fileToRW.print("LATCH ");
+            fileToRW.print(String(i) + " ");
+            
+            Serial.println("latches[" + String(i) + "].counter = " + String(latches[i].counter));
+            Serial.println("latches[" + String(i) + "].state = " + String(latches[i].state));
+            Serial.println("latches[" + String(i) + "].lastState = " + String(latches[i].lastState));
+            
+            fileToRW.print(String(latches[i].counter) + " ");
+            fileToRW.print(String(latches[i].state) + " ");
+            fileToRW.print(String(latches[i].lastState) + " ");
+            
+            fileToRW.print("END ");
+        }
         
         fileToRW.print("ENDFIN ");
         fileToRW.close();
@@ -900,95 +998,96 @@ void loop()
     }*/
     
     // MARK: - LOW LATCH
-    lowPickState = digitalRead(SW_LO_PK);
+    latches[0].state = digitalRead(SW_LO_PK);
     
-    if (lowPickState != lastLowPickState) {
-        if (lowPickState == HIGH) {
-            lowPickCounter++;
+    if (latches[0].state != latches[0].lastState) {
+        if (latches[0].state == HIGH) {
+            latches[0].counter++;
         }
         
         delay(50);
     }
     
-    lastLowPickState = lowPickState;
+    //latches[0].lastState = latches[0].state;
+    latches[0].lastState = latches[0].state;
     
-    if (lowPickCounter % 2 == 0) {
+    if (latches[0].counter % 2 == 0) {
         digitalWrite(LED_LO_PK, HIGH);
     } else {
         digitalWrite(LED_LO_PK, LOW);
     }
     
     // MARK: - MID2 LATCH
-    mid2State = digitalRead(SW_MID2_PK);
+    latches[1].state = digitalRead(SW_MID2_PK);
     
-    if (mid2State != lastMid2PickState) {
-        if (mid2State == HIGH) {
-            mid2Counter++;
+    if (latches[1].state != latches[1].lastState) {
+        if (latches[1].state == HIGH) {
+            latches[1].counter++;
         }
         
         delay(50);
     }
     
-    lastMid2PickState = mid2State;
+    latches[1].lastState = latches[1].state;
     
-    if (mid2Counter % 2 == 0) {
+    if (latches[1].counter % 2 == 0) {
         digitalWrite(LED_MID2_PK, HIGH);
     } else {
         digitalWrite(LED_MID2_PK, LOW);
     }
     
     // MARK: - HIGH LATCH
-    highPickState = digitalRead(SW_HI_PK);
+    latches[2].state = digitalRead(SW_HI_PK);
     
-    if (highPickState != lastHighPickState) {
-        if (highPickState == HIGH) {
-            highPickCounter++;
+    if (latches[2].state != latches[2].lastState) {
+        if (latches[2].state == HIGH) {
+            latches[2].counter++;
         }
         
         delay(50);
     }
     
-    lastHighPickState = highPickState;
+    latches[2].lastState = latches[2].state;
     
-    if (highPickCounter % 2 == 0) {
+    if (latches[2].counter % 2 == 0) {
         digitalWrite(LED_HI_PK, HIGH);
     } else {
         digitalWrite(LED_HI_PK, LOW);
     }
     
     // MARK: - FILTER ON LATCH
-    filterOnState = digitalRead(SW_FILTER_ON);
+    latches[3].state = digitalRead(SW_FILTER_ON);
     
-    if (filterOnState != lastFilterOnState) {
-        if (filterOnState == HIGH) {
-            filterOnCounter++;
+    if (latches[3].state != latches[3].lastState) {
+        if (latches[3].state == HIGH) {
+            latches[3].counter++;
         }
         
         delay(50);
     }
     
-    lastFilterOnState = filterOnState;
+    latches[3].lastState = latches[3].state;
     
-    if (filterOnCounter % 2 == 0) {
+    if (latches[3].counter % 2 == 0) {
         digitalWrite(LED_FILTER_ON, LOW);
     } else {
         digitalWrite(LED_FILTER_ON, HIGH);
     }
     
     // MARK: - BYPASS LATCH
-    bypassState = digitalRead(SW_BYPASS);
+    latches[4].state = digitalRead(SW_BYPASS);
     
-    if (bypassState != lastBypassState) {
-        if (bypassState == HIGH) {
-            bypassCounter++;
+    if (latches[4].state != latches[4].lastState) {
+        if (latches[4].state == HIGH) {
+            latches[4].counter++;
         }
         
         delay(50);
     }
     
-    lastBypassState = bypassState;
+    latches[4].lastState = latches[4].state;
     
-    if (bypassCounter % 2 == 0) {
+    if (latches[4].counter % 2 == 0) {
         digitalWrite(LED_BYPASS, LOW);
     } else {
         digitalWrite(LED_BYPASS, HIGH);
@@ -1253,97 +1352,144 @@ void loop()
         SPI.endTransaction();
         digitalWrite(53, HIGH);
         
+        latches[3].tempState = latches[3].memState;
+        latches[3].tempCounter = latches[3].memCounter;
+        latches[3].tempLastState = latches[3].memLastState;
+        
+        latches[4].tempState = latches[4].memState;
+        latches[4].tempCounter = latches[4].memCounter;
+        latches[4].tempLastState = latches[4].memLastState;
+        
+        // MARK: - FILTER ON LATCH
+        /*latches[3].tempState = digitalRead(SW_FILTER_ON);
+        
+        if (latches[3].tempState != latches[3].tempLastState) {
+            if (latches[3].tempState == HIGH) {
+                latches[3].tempCounter++;
+            }
+            
+            delay(50);
+        }
+        
+        latches[3].tempLastState = latches[3].tempState;*/
+        
+        if (latches[3].tempCounter % 2 == 0) {
+            digitalWrite(LED_FILTER_ON, LOW);
+        } else {
+            digitalWrite(LED_FILTER_ON, HIGH);
+        }
+        
+        // MARK: - BYPASS LATCH
+        /*latches[4].tempState = digitalRead(SW_BYPASS);
+        
+        if (latches[4].tempState != latches[4].tempLastState) {
+            if (latches[4].tempState == HIGH) {
+                latches[4].tempCounter++;
+            }
+            
+            delay(50);
+        }
+        
+        latches[4].tempLastState = latches[4].tempState;*/
+        
+        if (latches[4].tempCounter % 2 == 0) {
+            digitalWrite(LED_BYPASS, LOW);
+        } else {
+            digitalWrite(LED_BYPASS, HIGH);
+        }
+        
+        
         while (shouldUseMemory == true) {
             // MARK: - LOW LATCH
-            lowPickState = digitalRead(SW_LO_PK);
+            /*latches[0].state = digitalRead(SW_LO_PK);
             
-            if (lowPickState != lastLowPickState) {
-                if (lowPickState == HIGH) {
-                    lowPickCounter++;
+            if (latches[0].state != latches[0].lastState) {
+                if (latches[0].state == HIGH) {
+                    latches[0].counter++;
                 }
                 
                 delay(50);
             }
             
-            lastLowPickState = lowPickState;
+            latches[0].lastState = latches[0].state;*/
             
-            if (lowPickCounter % 2 == 0) {
+            if (latches[0].memCounter % 2 == 0) {
                 digitalWrite(LED_LO_PK, HIGH);
             } else {
                 digitalWrite(LED_LO_PK, LOW);
             }
             
             // MARK: - MID2 LATCH
-            mid2State = digitalRead(SW_MID2_PK);
+            /*latches[1].state = digitalRead(SW_MID2_PK);
             
-            if (mid2State != lastMid2PickState) {
-                if (mid2State == HIGH) {
-                    mid2Counter++;
+            if (latches[1].state != latches[1].lastState) {
+                if (latches[1].state == HIGH) {
+                    latches[1].counter++;
                 }
                 
                 delay(50);
             }
             
-            lastMid2PickState = mid2State;
+            latches[1].lastState = latches[1].state;*/
             
-            if (mid2Counter % 2 == 0) {
+            if (latches[1].memCounter % 2 == 0) {
                 digitalWrite(LED_MID2_PK, HIGH);
             } else {
                 digitalWrite(LED_MID2_PK, LOW);
             }
             
             // MARK: - HIGH LATCH
-            highPickState = digitalRead(SW_HI_PK);
+            /*latches[2].state = digitalRead(SW_HI_PK);
             
-            if (highPickState != lastHighPickState) {
-                if (highPickState == HIGH) {
-                    highPickCounter++;
+            if (latches[2].state != latches[2].lastState) {
+                if (latches[2].state == HIGH) {
+                    latches[2].counter++;
                 }
                 
                 delay(50);
             }
             
-            lastHighPickState = highPickState;
+            latches[2].lastState = latches[2].state;*/
             
-            if (highPickCounter % 2 == 0) {
+            if (latches[2].memCounter % 2 == 0) {
                 digitalWrite(LED_HI_PK, HIGH);
             } else {
                 digitalWrite(LED_HI_PK, LOW);
             }
             
             // MARK: - FILTER ON LATCH
-            filterOnState = digitalRead(SW_FILTER_ON);
+            latches[3].tempState = digitalRead(SW_FILTER_ON);
             
-            if (filterOnState != lastFilterOnState) {
-                if (filterOnState == HIGH) {
-                    filterOnCounter++;
+            if (latches[3].tempState != latches[3].tempLastState) {
+                if (latches[3].tempState == HIGH) {
+                    latches[3].tempCounter++;
                 }
                 
                 delay(50);
             }
             
-            lastFilterOnState = filterOnState;
+            latches[3].tempLastState = latches[3].tempState;
             
-            if (filterOnCounter % 2 == 0) {
+            if (latches[3].tempCounter % 2 == 0) {
                 digitalWrite(LED_FILTER_ON, LOW);
             } else {
                 digitalWrite(LED_FILTER_ON, HIGH);
             }
             
             // MARK: - BYPASS LATCH
-            bypassState = digitalRead(SW_BYPASS);
+            latches[4].tempState = digitalRead(SW_BYPASS);
             
-            if (bypassState != lastBypassState) {
-                if (bypassState == HIGH) {
-                    bypassCounter++;
+            if (latches[4].tempState != latches[4].tempLastState) {
+                if (latches[4].tempState == HIGH) {
+                    latches[4].tempCounter++;
                 }
                 
                 delay(50);
             }
             
-            lastBypassState = bypassState;
+            latches[4].tempLastState = latches[4].tempState;
             
-            if (bypassCounter % 2 == 0) {
+            if (latches[4].tempCounter % 2 == 0) {
                 digitalWrite(LED_BYPASS, LOW);
             } else {
                 digitalWrite(LED_BYPASS, HIGH);
