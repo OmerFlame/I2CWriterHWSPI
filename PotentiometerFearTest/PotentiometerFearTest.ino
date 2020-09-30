@@ -904,7 +904,9 @@ void setup()
     pinMode(SET_OUT, OUTPUT);
     pinMode(MEM_INDICATOR, OUTPUT);
     pinMode(4, OUTPUT);
-    pinMode(23, OUTPUT);
+    //pinMode(53, OUTPUT);
+    pinMode(12, OUTPUT);
+    
     SPI.begin();
     //SPI.setClockDivider(SPI_CLOCK_DIV2);
     //SPI.setBitOrder(MSBFIRST);
@@ -919,8 +921,8 @@ void setup()
     
     delay(3000);
     
+    /*SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE1));
     digitalWrite(53, LOW);
-    SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE1));
     SPI.transfer16(0x1802);
     SPI.transfer16(0x1802);
     SPI.transfer16(0x1802);
@@ -929,20 +931,59 @@ void setup()
     SPI.transfer16(0x1802);
     SPI.transfer16(0x1802);
     SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.transfer16(0x1802);
-    SPI.endTransaction();
     digitalWrite(53, HIGH);
+    SPI.endTransaction();
+    
+    digitalWrite(12, LOW);
+    SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE1));
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    
+    //delay(70);
+    digitalWrite(12, HIGH);
+    SPI.endTransaction();*/
+    
+    SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE1));
+    digitalWrite(53, LOW);
+    delay(30);
+    
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    delay(10);
+    SPI.transfer16(0x1802);
+    //SPI.transfer16(0x0000);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    //SPI.transfer16(0x1802);
+    //SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    SPI.transfer16(0x1802);
+    
+    delay(30);
+    digitalWrite(53, HIGH);
+    SPI.endTransaction();
+    
     delay(1);
     
     if (!SD.begin(2)) {
@@ -1305,52 +1346,66 @@ void loop()
         digitalWrite(MEM_INDICATOR, HIGH);
         
         // MARK: - Memory SPI
+        /*digitalWrite(53, LOW);
+        SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE1));
+        SPI.transfer16(qInstruction2);
+        SPI.transfer16(frequencyInstruction2);
+        SPI.transfer16(frequencyInstruction2);
+        SPI.transfer16(dbInstruction2);
+        SPI.transfer16(qInstruction);
+        SPI.transfer16(frequencyInstruction);
+        SPI.transfer16(frequencyInstruction);
+        SPI.transfer16(dbInstruction);
+        digitalWrite(53, HIGH);
+        
+        digitalWrite(12, LOW);
+        SPI.transfer16(qInstructionLow);
+        SPI.transfer16(frequencyInstructionLow);
+        SPI.transfer16(frequencyInstructionLow);
+        SPI.transfer16(dbInstructionLow);
+        SPI.transfer16(highPassInstruction);
+        SPI.transfer16(highPassInstruction);
+        SPI.transfer16(qInstructionMid1);
+        SPI.transfer16(frequencyInstructionMid1);
+        SPI.transfer16(frequencyInstructionMid1);
+        SPI.transfer16(dbInstructionMid1);
+        SPI.transfer16(lowPassInstruction);
+        SPI.transfer16(lowPassInstruction);
+        
+        //delay(30);
+        digitalWrite(12, HIGH);
+        SPI.endTransaction();*/
+        
         digitalWrite(53, LOW);
+        delay(10);
+        
         SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE1));
         SPI.transfer16(qInstructionLow);
-        delay(1);
         SPI.transfer16(frequencyInstructionLow);
-        delay(1);
         SPI.transfer16(frequencyInstructionLow);
-        delay(1);
         SPI.transfer16(dbInstructionLow);
-        delay(1);
         SPI.transfer16(highPassInstruction);
-        delay(1);
+        delay(10);
         SPI.transfer16(highPassInstruction);
-        delay(1);
+        //SPI.transfer16(0x0000);
         SPI.transfer16(qInstructionMid1);
-        delay(1);
         SPI.transfer16(frequencyInstructionMid1);
-        delay(1);
         SPI.transfer16(frequencyInstructionMid1);
-        delay(1);
         SPI.transfer16(dbInstructionMid1);
-        delay(1);
-        SPI.transfer16(lowPassInstruction);
-        //SPI.transfer16(0x0000);
-        delay(1);
-        SPI.transfer16(lowPassInstruction);
-        //SPI.transfer16(0x0000);
-        delay(1);
+        //SPI.transfer16(lowPassInstruction);
+        //SPI.transfer16(lowPassInstruction);
         SPI.transfer16(qInstruction2);
-        delay(1);
         SPI.transfer16(frequencyInstruction2);
-        delay(1);
         SPI.transfer16(frequencyInstruction2);
-        delay(1);
         SPI.transfer16(dbInstruction2);
-        delay(1);
         SPI.transfer16(qInstruction);
-        delay(1);
         SPI.transfer16(frequencyInstruction);
-        delay(1);
         SPI.transfer16(frequencyInstruction);
-        delay(1);
         SPI.transfer16(dbInstruction);
-        delay(1);
-        SPI.endTransaction();
+        
+        delay(10);
         digitalWrite(53, HIGH);
+        SPI.endTransaction();
         
         latches[3].tempState = latches[3].memState;
         latches[3].tempCounter = latches[3].memCounter;
@@ -2014,52 +2069,94 @@ void loop()
         float resistanceFromTravelLow = 5000 * travelToResistanceLog(travelLow);
         int wiperFromTravelLow = resistanceToWiper(20000, resistanceFromTravelLow);
         word qInstructionLow = wiperToInstruction(wiperFromTravelLow);
+        
+        word instructionBank[] = {
+            qInstructionLow,
+            frequencyInstructionLow,
+            frequencyInstructionLow,
+            dbInstructionLow,
+            
+            highPassInstruction,
+            highPassInstruction,
+            
+            qInstructionMid1,
+            frequencyInstructionMid1,
+            frequencyInstructionMid1,
+            dbInstructionMid1,
+            
+            lowPassInstruction,
+            lowPassInstruction,
+            
+            qInstruction2,
+            frequencyInstruction2,
+            frequencyInstruction2,
+            dbInstruction2,
+            
+            qInstruction,
+            frequencyInstruction,
+            frequencyInstruction,
+            dbInstruction
+        };
         // MARK: - SPI
+        /*digitalWrite(53, LOW);
+        SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE1));
+        SPI.transfer16(qInstruction2);
+        SPI.transfer16(frequencyInstruction2);
+        SPI.transfer16(frequencyInstruction2);
+        SPI.transfer16(dbInstruction2);
+        SPI.transfer16(qInstruction);
+        SPI.transfer16(frequencyInstruction);
+        SPI.transfer16(frequencyInstruction);
+        SPI.transfer16(dbInstruction);
+        digitalWrite(53, HIGH);
+        SPI.endTransaction();
+        
+        digitalWrite(12, LOW);
+        SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE1));
+        SPI.transfer16(qInstructionLow);
+        SPI.transfer16(frequencyInstructionLow);
+        SPI.transfer16(frequencyInstructionLow);
+        SPI.transfer16(dbInstructionLow);
+        SPI.transfer16(highPassInstruction);
+        SPI.transfer16(highPassInstruction);
+        SPI.transfer16(qInstructionMid1);
+        SPI.transfer16(frequencyInstructionMid1);
+        SPI.transfer16(frequencyInstructionMid1);
+        SPI.transfer16(dbInstructionMid1);
+        SPI.transfer16(lowPassInstruction);    
+        SPI.transfer16(lowPassInstruction);
+        SPI.endTransaction();
+        digitalWrite(12, HIGH);*/
+        
         digitalWrite(53, LOW);
+        delay(10);
+        
         SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE1));
         SPI.transfer16(qInstructionLow);
-        delay(1);
         SPI.transfer16(frequencyInstructionLow);
-        delay(1);
         SPI.transfer16(frequencyInstructionLow);
-        delay(1);
         SPI.transfer16(dbInstructionLow);
-        delay(1);
         SPI.transfer16(highPassInstruction);
-        delay(1);
+        delay(10);
         SPI.transfer16(highPassInstruction);
-        delay(1);
+        //SPI.transfer16(0x0000);
         SPI.transfer16(qInstructionMid1);
-        delay(1);
         SPI.transfer16(frequencyInstructionMid1);
-        delay(1);
         SPI.transfer16(frequencyInstructionMid1);
-        delay(1);
         SPI.transfer16(dbInstructionMid1);
-        delay(1);
-        SPI.transfer16(lowPassInstruction);
-        //SPI.transfer16(0x0000);
-        delay(1);
-        SPI.transfer16(lowPassInstruction);
-        //SPI.transfer16(0x0000);
-        delay(1);
+        //SPI.transfer16(lowPassInstruction);
+        //SPI.transfer16(lowPassInstruction);
         SPI.transfer16(qInstruction2);
-        delay(1);
         SPI.transfer16(frequencyInstruction2);
-        delay(1);
         SPI.transfer16(frequencyInstruction2);
-        delay(1);
         SPI.transfer16(dbInstruction2);
-        delay(1);
         SPI.transfer16(qInstruction);
-        delay(1);
         SPI.transfer16(frequencyInstruction);
-        delay(1);
         SPI.transfer16(frequencyInstruction);
-        delay(1);
         SPI.transfer16(dbInstruction);
-        delay(1);
-        SPI.endTransaction();
+        
+        delay(10);
         digitalWrite(53, HIGH);
+        SPI.endTransaction();
     }
 }
