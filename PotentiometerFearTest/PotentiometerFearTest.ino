@@ -950,7 +950,9 @@ int universalReadingToWiper(int reading, char* band_property) {
                     wiper = NULL;
                     break;
             }
-
+		    
+            free(token);
+            free(tokens);
             return wiper;
 
         case "m2":
@@ -979,6 +981,8 @@ int universalReadingToWiper(int reading, char* band_property) {
                     break;
             }
 
+            free(token);
+            free(tokens);
             return wiper;
 
         case "lp":
@@ -988,6 +992,8 @@ int universalReadingToWiper(int reading, char* band_property) {
             int lowPassWiper = 1023 - resistanceToWiper(50000, lowPassResistance);
             wiper = lowPassWiper;
             
+            free(token);
+            free(tokens);
             return wiper;
 
         case "m1":
@@ -1016,6 +1022,8 @@ int universalReadingToWiper(int reading, char* band_property) {
                     break;
             }
 
+            free(token);
+            free(tokens);
             return wiper;
 
         case "hp":
@@ -1025,6 +1033,8 @@ int universalReadingToWiper(int reading, char* band_property) {
             int highPassWiper = resistanceToWiper(50000, highPassResistance);
             wiper = highPassWiper;
 
+            free(token);
+            free(tokens);
             return wiper;
 
         case "l":
@@ -1053,9 +1063,13 @@ int universalReadingToWiper(int reading, char* band_property) {
                     break;
             }
 
+            free(token);
+            free(tokens);
             return wiper;
 
         default:
+            free(token);
+            free(tokens);
             return NULL;
     }
 }
