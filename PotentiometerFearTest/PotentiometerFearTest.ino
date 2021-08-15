@@ -885,6 +885,181 @@ unsigned int resistanceToWiper(long maximumResistance, long resistance) {
     return int(wiper);
 }
 
+// IMPORTANT NOTE: THIS FUNCTION HAS NOT BEEN TESTED YET.
+int universalReadingToWiper(int reading, char* band_property) {
+    /* band_property usage guide:
+     * In order to pass the parameter correctly, you must have 1 pair of data in the string, separated by a dash.
+     * The types of data that are required are the band type and the specific property of the band that you want to calculate its wiper.
+     * 
+     * Band list:
+     * h  = High band
+     * m2 = Mid-2 band
+     * lp = Low-pass filter
+     * m1 = Mid-1 band
+     * hp = High-pass filter
+     * l  = Low band
+     *
+     * Property list:
+     * f  = Frequency
+     * db = dB
+     * q  = Q-value
+     *
+     * Example: In order to calculate the dB wiper for the Mid-2 band, pass "m2-db" in band_property.
+     *
+     */
+    
+    char* token;
+    char** tokens;
+    int i = 0;
+    int wiper = 0;
+	
+    tokens = (char**)malloc(sizeof(char*) * 2);
+
+    token = strtok(band_property, "-");
+
+    while (token != NULL) {
+        tokens[i] = (char*)malloc((strlen(token) + 1) * sizeof(char));
+        strcpy(tokens[i], token);
+        token = strtok(NULL, "-");
+        i++;
+    }
+    
+    switch (tokens[0]) {
+        case "h":
+            switch (tokens[1]) {
+                case "f":
+                    long frequency = map(reading, 0, 1023, 800, 17000);
+                    float resistanceFromFrequency = freqToResistanceAntiLog(frequency, 0.0000000039);
+                    int wiperFromResistance = resistanceToWiper(50000, resistanceFromFrequency);
+                    wiper = wiperFromResistance;
+                    break;
+                
+                case "db":
+                    wiper = reading;
+                    break;
+
+                case "q":
+                    int q = map(reading, 0, 1023, 0, 100);
+                    float travel = mapFloat(q, 0.0, 100.0, 0.0, 1.0);
+                    float resistanceFromTravel = 20000 * travelToResistanceLog(travel);
+                    int wiperFromTravel = resistanceToWiper(20000, resistanceFromTravel);
+                    wiper = wiperFromTravel;
+                    break;
+
+                default:
+                    wiper = NULL;
+                    break;
+            }
+
+            return wiper;
+
+        case "m2":
+            switch (tokens[1]) {
+                case "f":
+                    long frequency2 = map(reading, 0, 1023, 400, 8000);
+                    float resistanceFromFrequency2 = freqToResistanceAntiLog(frequency2, 0.0000000082);
+                    int wiperFromResistance2 = resistanceToWiper(50000, resistanceFromFrequency2);
+                    wiper = wiperFromResistance2;
+                    break;
+
+                case "db":
+                    wiper = reading;
+                    break;
+                
+                case "q":
+                    int q2 = map(reading, 0, 1023, 0, 100);
+                    float travel2 = mapFloat(q2, 0.0, 100.0, 0.0, 1.0);
+                    float resistanceFromTravel2 = 5000 * travelToResistanceLog(travel2);
+                    int wiperFromTravel2 = resistanceToWiper(20000, resistanceFromTravel2);
+                    wiper = wiperFromTravel2;
+                    break;
+
+                default:
+                    wiper = NULL;
+                    break;
+            }
+
+            return wiper;
+
+        case "lp":
+            long lowPassFreq = map(reading, 0, 1023, long(96.46), long(14615));
+            float lowPassResistance = (1 / (2 * PI * lowPassFreq * 0.000000033));
+            lowPassResistance = mapFloat(lowPassResistance, 330.0, 50238.30, 330.0, 50000.0);
+            int lowPassWiper = 1023 - resistanceToWiper(50000, lowPassResistance);
+            wiper = lowPassWiper;
+            
+            return wiper;
+
+        case "m1":
+            switch (tokens[1]) {
+                case "f":
+                    long frequencyMid1 = map(reading, 0, 1023, 400, 8000);
+                    float resistanceFromFrequencyMid1 = freqToResistanceAntiLog(frequencyMid1, 0.0000000082);
+                    int wiperFromResistanceMid1 = resistanceToWiper(50000, resistanceFromFrequencyMid1);
+                    wiper = wiperFromResistanceMid1;
+                    break;
+            
+                case "db":
+                    wiper = reading;
+                    break;
+
+                case "q":
+                    int qMid1 = map(reading, 0, 1023, 0, 100);
+                    float travelMid1 = mapFloat(qMid1, 0.0, 100.0, 0.0, 1.0);
+                    float resistanceFromTravelMid1 = 5000 * travelToResistanceLog(travelMid1);
+                    int wiperFromTravelMid1 = resistanceToWiper(20000, resistanceFromTravelMid1);
+                    wiper = wiperFromTravelMid1;
+                    break;
+
+                default:
+                    wiper = NULL;
+                    break;
+            }
+
+            return wiper;
+
+        case "hp":
+            long highPassFreq = map(reading, 0, 1023, long(26.526), long(2368.4));
+            float highPassResistance = (1 / (2 * PI * highPassFreq * 0.00000012));
+            highPassResistance = mapFloat(highPassResistance, 560.09, 51011.2, 560.0, 50000.0);
+            int highPassWiper = resistanceToWiper(50000, highPassResistance);
+            wiper = highPassWiper;
+
+            return wiper;
+
+        case "l":
+            switch (tokens[1]) {
+                case "f":
+                    long frequencyLow = map(reading, 0, 1023, 40, 800);
+                    float frequencyResistanceLow = (1 / (2 * PI * frequencyLow * 0.000000082));
+                    int frequencyWiperLow = resistanceToWiper(50000, frequencyResistanceLow);
+                    wiper = frequencyWiperLow;
+                    break;
+
+                case "db":
+                    wiper = reading;
+                    break;
+
+                case "q":
+                    int qLow = map(reading, 0, 1023, 0, 100);
+                    float travelLow = mapFloat(qLow, 0.0, 100.0, 0.0, 1.0);
+                    float resistanceFromTravelLow = 5000 * travelToResistanceLog(travelLow);
+                    int wiperFromTravelLow = resistanceToWiper(20000, resistanceFromTravelLow);
+                    wiper = wiperFromTravelLow;
+                    break;
+
+                default:
+                    wiper = NULL;
+                    break;
+            }
+
+            return wiper;
+
+        default:
+            return NULL;
+    }
+}
+
 // Add setup code
 void setup()
 {
